@@ -1,0 +1,98 @@
+Description
+
+In this lab, you will practice Ansible ad-hoc commands to perform basic system configuration tasks on a remote server. The goal is to understand how Ansible can be used for quick, one-time automation tasks without writing playbooks.
+
+You are provided with an Ansible control node and a remote managed node (server1). The inventory file is already configured, allowing you to immediately focus on executing Ansible commands rather than setup.
+
+Using ad-hoc Ansible commands, you will:
+
+Ensure a required package is installed
+Create a system user with specific properties
+Verify idempotency by re-running commands safely
+This lab focuses on hands-on command execution, module usage, and idempotent behavior, which are core concepts in Ansible fundamentals.
+Server Details:
+
+Hostname: server1
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Password: server1_admin@123!
+Tasks
+Verify that the inventory.ini file exists in /home/user/workspace and ensure that it contains the required connection details for server1.
+
+Use an Ansible ad-hoc command with the appropriate module to ensure the git package is installed on server1.
+
+Use another Ansible ad-hoc command to create a user named "deploy" on server1.
+
+Ensure the deploy user has:
+
+A home directory named /home/deploy
+/bin/bash as the default shell
+Outcomes
+After completing this lab, you will be able to:
+
+Use Ansible ad-hoc commands for quick configuration tasks
+
+Install packages on remote systems using Ansible modules
+
+Create and manage users on remote servers using Ansible
+
+Understand and verify idempotency in Ansible operations
+
+Distinguish between ad-hoc command usage and playbook-based automation
+
+
+_________________________________________________________
+
+
+# inventory.ini 
+
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+
+# Need to check connectivity
+
+user@258e09aaaf6d:~/workspace$ ansible web -i inventory.ini -m ping
+
+server1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+# Installing GIT 
+
+user@258e09aaaf6d:~/workspace$ ansible web -i inventory.ini -m apt -a "name=git state=present" -b
+
+server1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "cache_update_time": 1769150954,
+    "cache_updated": false,
+    "changed": false
+}
+
+
+# A home directory named /home/deploy
+# /bin/bash as the default shell
+
+user@258e09aaaf6d:~/workspace$ ansible -i /home/user/workspace/inventory.ini server1   -m user -a "name=deploy home=/home/deploy shell=/bin/bash create_home=yes state=present" -b
+server1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "append": false,
+    "changed": false,
+    "comment": "",
+    "group": 1002,
+    "home": "/home/deploy",
+    "move_home": false,
+    "name": "deploy",
+    "shell": "/bin/bash",
+    "state": "present",
+    "uid": 1002
+}
+user@258e09aaaf6d:~/workspace$ 
+
