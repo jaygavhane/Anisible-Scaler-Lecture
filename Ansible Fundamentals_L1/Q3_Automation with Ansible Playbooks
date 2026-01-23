@@ -1,0 +1,124 @@
+Description
+In this lab, you will move from using Ansible ad-hoc commands to writing and executing Ansible playbook. While ad-hoc commands are useful for quick, one-time operations, real-world infrastructure automation relies on playbooks because they are reusable, readable, and idempotent.
+
+You are provided with an Ansible control node and a managed node (server1). Your task is to create an inventory file, write a YAML-based playbook that installs NGINX, verifies the installation, and creates a marker file to prove that the playbook was executed.
+
+Tasks
+1. Create a working directory named workspace on the Ansible control node.
+
+Set up a dedicated working directory "/home/user/workspace" on the Ansible control node.
+2. Create an "inventory.ini" file that defines the managed node (server1) with correct SSH and sudo credentials.
+
+The inventory must define the managed node (server1) and include all required connection details so Ansible can:
+Connect to the remote host over SSH
+Authenticate using the correct user credentials
+Escalate privileges when required to perform administrative tasks
+3. Create an Ansible playbook file named "nginx-playbook.yml"
+
+In the playbook:
+Target the web host group.
+Enable privilege escalation using become.
+Disable fact gathering.
+Ensure NGINX is installed using the apt module.
+Verify the NGINX version using an Ansible module.
+Create a marker file at "/tmp/nginx_playbook_ran" to prove playbook execution.
+Execute the playbook using the ansible-playbook command.
+Required Credentials for the Lab:
+
+SSH Credentials: (for remote connection to server1)
+These are used by Ansible to log in to the target node.
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Credentials (for privilege escalation)
+Sudo Password: server1_admin@123!
+Outcomes
+After completing this lab, you will be able to:
+Explain the difference between ad-hoc Ansible commands and playbooks.
+Write a valid Ansible playbook using YAML.
+Use Ansible modules within playbooks to manage system state.
+Execute a playbook against managed nodes using the Ansible CLI.
+Understand and verify playbook execution through observable system changes.
+
+
+______________________________________________________________
+
+
+path = /home/user/workspace/inventory.ini
+
+# Will create inventry.ini file to add server details
+
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+
+# What we want to do 
+
+We need to run playbook 
+ : Need to install nginx
+ : Need to verify nginx version
+ : create a marker file at "/tmp/nginx_playbook_ran"
+ : Execute the playbook using the ansible-playbook command.
+
+
+ # Now will create a yaml file = nginx-playbook.yml
+
+ - name: Install and verify NGINX
+  hosts: web
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Ensure NGINX is installed
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Verify NGINX version
+      command: nginx -v
+      register: nginx_version
+      ignore_errors: yes
+
+    - name: Display NGINX version
+      debug:
+        msg: "{{ nginx_version.stderr }}"
+
+    - name: Create marker file to prove playbook execution
+      file:
+        path: /tmp/nginx_playbook_ran
+        state: touch
+
+# Need to run yaml file 
+
+ansible-playbook -i inventory.ini nginx-playbook.yml
+
+# Output 
+
+PLAY [Install and verify NGINX] ************************************************
+
+TASK [Ensure NGINX is installed] ***********************************************
+changed: [server1]
+
+TASK [Verify NGINX version] ****************************************************
+changed: [server1]
+
+TASK [Display NGINX version] ***************************************************
+ok: [server1] => {
+    "msg": "nginx version: nginx/1.24.0 (Ubuntu)"
+}
+
+TASK [Create marker file to prove playbook execution] **************************
+changed: [server1]
+
+PLAY RECAP *********************************************************************
+server1                    : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+# cross verify
+
+ansible -i inventory.ini web -m command -a "nginx -v"
+
+ansible -i inventory.ini web -m command -a "systemctl status nginx"
+
+ansible -i inventory.ini web -m stat -a "path=/tmp
+nginx_playbook_ran"
+
