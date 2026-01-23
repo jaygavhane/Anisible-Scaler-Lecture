@@ -1,0 +1,87 @@
+Description
+In this lab, you will use Ansible ad-hoc commands to distribute a system-wide Message of the Day (MOTD) file from the Ansible control node to a remote server (server1). The MOTD file displays a welcome message to users when they log in and is commonly used for compliance notices or system information.
+
+You will manually create an Ansible inventory file, verify the existence of the MOTD source file, and then use Ansible’s copy module to place the file at /etc/motd on the managed node. Since /etc/motd is a system file, privilege escalation is required.
+
+This lab reinforces:
+
+File distribution using Ansible
+Inventory management
+Privilege escalation
+Server Details:
+
+Hostname: server1
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Password: server1_admin@123!
+Tasks
+Create a working directory "/home/user/workspace" on the Ansible control node.
+
+Inside the workspace, create an inventory.ini file that defines server1 with correct SSH and sudo credentials.
+
+Confirm that a file named motd exists in the workspace directory on the control node.
+
+Ensure the motd file contains exactly the following message: Welcome to Server1! Compliance with company policies is mandatory.
+
+Use an Ansible ad-hoc command with the copy module to transfer the motd file to /etc/motd on server1.
+
+Use privilege escalation (--become) when copying the file.
+
+Verify the contents of /etc/motd on server1 using Ansible (not manual SSH).
+
+Ensure the copied file fully replaces any existing MOTD content.
+
+Outcome
+After completing this lab, you will be able to:
+Create and use a custom Ansible inventory file
+Distribute files to remote servers using the Ansible copy module
+Apply privilege escalation correctly for system-level file operations
+Verify remote file contents using Ansible
+Understand how Ansible enforces consistent configuration across systems
+
+___________________________________________________________________
+
+# Need to apply motd 
+
+will create a inventory.ini 
+
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+
+# Will verify the connection
+
+ansible web -i invertory.ini -m ping
+
+# Need to create motd file - /home/user/workspace/motd
+
+Welcome to Server1! Compliance with company policies is mandatory.
+
+# Need to apply motd 
+
+ansible web -i inventory.ini -m -a copy "src=/home/user/workspace/motd dest=/etc/motd owner=root group=root mode=0644" -b
+
+server1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "checksum": "eb542e057966b62dfae47c38b89a92de7b0c7257",
+    "dest": "/etc/motd",
+    "gid": 0,
+    "group": "root",
+    "mode": "0644",
+    "owner": "root",
+    "path": "/etc/motd",
+    "size": 67,
+    "state": "file",
+    "uid": 0
+}
+
+# Need to verify motd
+
+ansible web -i inventory.ini -m command -a "cat
+ /etc/motd"
+ 
+server1 | CHANGED | rc=0 >>
+Welcome to Server1! Compliance with company policies is mandatory.
+user@9000fff2af5c:~/workspace$ 
