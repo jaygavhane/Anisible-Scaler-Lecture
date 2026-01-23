@@ -1,0 +1,104 @@
+Q1. Understanding Configuration as Code with Ansible
+
+Guide for using Scaler IDE to solve DevOps problems.
+feature icon
+Using hints except Complete Solution is Penalty free now
+Use Hint
+Description
+In this lab, you will learn one of the most important concepts in modern infrastructure automation: Configuration as Code. Instead of manually logging into servers and running commands, you will use Ansible to describe the desired state of a system and let Ansible enforce it automatically.
+
+You are provided with an Ansible control node (where Ansible is already installed) and a remote target node (server1). Your task is to ensure that the NGINX web server is installed on the remote server using Ansible, and to demonstrate that the same automation can be safely re-run without causing unnecessary changes.
+
+This lab intentionally uses Ansible ad-hoc commands (not playbooks) to help you focus on fundamentals such as inventory, modules, privilege escalation, and idempotency.
+
+Objectives
+Understand how Ansible enforces configuration instead of performing one-time actions
+Learn how inventory files define managed nodes and authentication
+Use Ansible modules (apt, command) correctly
+Demonstrate idempotency by re-running automation safely
+Required Credentials for the Lab:
+
+SSH Credentials (for remote connection to server1)
+These are used by Ansible to log in to the target node.
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Credentials (for privilege escalation)
+These are used by Ansible when running commands with --become (e.g., installing packages).
+Sudo Password: server1_admin@123!
+Tasks
+1. Create the inventory.ini File
+
+Your first task is to tell Ansible which server it should manage and how to connect to it.
+
+Ansible does not “discover” servers automatically — it relies on an inventory file.
+
+Create and Navigate to your workspace directory on the Ansible control node: cd /home/user/workspace
+
+Create a file named inventory.ini: vim inventory.ini
+
+Inside this file, define:
+
+A host group named [web]
+
+The target host server1
+
+SSH username and password
+
+Sudo password for privilege escalation
+
+Your file must look like this:
+
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+Why this is important?
+
+This file tells Ansible where to connect and how to authenticate.
+Without a correct inventory, Ansible cannot manage any server.
+2. Install NGINX Using Ansible (Configuration as Code)
+
+Instead of logging into the server manually, you will now use Ansible to declare the desired state.
+
+Run this command from the control node: ansible -i inventory.ini server1 -m apt -a "name=nginx state=present" --become
+
+Breakdown of this command:
+
+-i inventory.ini → use your inventory file
+
+server1 → target only server1
+
+-m apt → use Ansible’s package manager module
+
+state=present → NGINX must be installed
+
+--become → run with sudo privileges
+
+Expected behavior:
+
+If NGINX is not installed, Ansible installs it.
+Ansible reports changed: true on the first run.
+3. Verify NGINX Installation Using Ansible (Not SSH)
+
+You must confirm the installation using Ansible itself, not by manually SSH’ing into the server.
+Run: ansible -i inventory.ini server1 -m command -a "nginx -v"
+If NGINX is installed, you will see output similar to: nginx version: nginx/1.24.0 (Ubuntu)
+4. Re-Run the Same Command to Prove Idempotency
+
+This task demonstrates the most important Ansible concept: idempotency.
+
+Run the same installation command again: ansible -i inventory.ini server1 -m apt -a "name=nginx state=present" --become
+
+Expected result:
+
+Ansible should report:
+
+"changed": false
+
+This means the system already matches the desired state and no unnecessary changes were made.
+
+Outcome
+By completing these tasks, you will:
+Understand how Ansible uses inventory files
+Install software using configuration as code
+Verify remote state without manual access
+Prove idempotency by safely re-running automation
+If Ansible reports "changed": false on the second run, you have successfully completed the lab.
