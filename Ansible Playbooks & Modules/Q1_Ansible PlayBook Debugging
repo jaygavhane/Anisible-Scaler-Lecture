@@ -1,0 +1,53 @@
+Description
+In this lab, you will debug and fix YAML syntax errors in an Ansible playbook. YAML is highly sensitive to indentation, spacing, and structure, and even small mistakes can prevent a playbook from running.
+
+You are provided with a broken Ansible playbook that contains multiple YAML syntax issues. Your task is to correct all syntax errors, validate the playbook using Ansible’s syntax check, and ensure that the playbook executes successfully against a managed node (server1).
+
+The corrected playbook must not only be syntactically valid but must also successfully perform its intended tasks, which include installing required packages and managing services on the managed node.
+
+Required Credentials for the Lab:
+
+SSH Credentials: (for remote connection to server1)
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Credentials (for privilege escalation)
+Sudo Password: server1_admin@123!
+Tasks
+1. Create a working directory at /home/user/workspace on the Ansible control node
+
+2. Create an inventory.ini file inside the workspace that:
+
+Defines a [web] host group
+
+Includes server1 with correct SSH and sudo credentials
+
+3. Use the provided file broken-playbook.yml to identify and fix all YAML syntax errors in the playbook, like:
+
+Incorrect indentation
+
+Missing colons (:)
+
+Missing dashes (-)
+
+Invalid key–value formatting
+
+4. Validate the corrected playbook syntax
+
+5. Execute the corrected playbook against server1
+
+6. Ensure the playbook completes successfully and performs the following actions:
+
+Installs the git package
+
+Installs the nginx package
+
+Starts the nginx service
+
+Outcome
+After completing this lab, you will be able to:
+Detect and fix YAML syntax errors in Ansible playbooks
+Understand proper YAML indentation and structure
+Execute corrected playbooks successfully
+Verify real system changes made by a playbook
+
+_______________________________________________________________________________________________________________________________________
