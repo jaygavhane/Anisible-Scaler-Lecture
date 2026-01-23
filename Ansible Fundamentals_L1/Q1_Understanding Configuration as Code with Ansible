@@ -50,6 +50,7 @@ Your file must look like this:
 
 [web]
 server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+
 Why this is important?
 
 This file tells Ansible where to connect and how to authenticate.
@@ -102,3 +103,19 @@ Install software using configuration as code
 Verify remote state without manual access
 Prove idempotency by safely re-running automation
 If Ansible reports "changed": false on the second run, you have successfully completed the lab.
+
+
+______________________________________________________
+
+Creating /home/user/workspace/inventory.ini
+
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+
+# Installing NGINX 
+
+ansible -i inventory.ini server1 -m apt -a "name=nginx state=present" --become
+
+# Need to verfiy the NGINX version
+
+ansible -i inventory.ini server1 -m command -a "nginx -v"
