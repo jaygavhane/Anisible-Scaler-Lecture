@@ -1,0 +1,103 @@
+Description
+In this lab, you will explore the difference between the Ansible command and shell modules. Although both modules execute commands on managed nodes, they behave very differently and are used for different purposes.
+
+The command module is safer and preferred for most tasks, but it does not support shell features such as pipes (|), redirection (>), environment variables, or command chaining. The shell module, on the other hand, allows full shell functionality but must be used carefully.
+
+Through hands-on tasks, you will intentionally run commands that fail with the command module and then fix them using the shell module. This lab ensures you clearly understand why both modules exist and when each should be used.
+
+Server Details:
+
+Hostname: server1
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Password: server1_admin@123!
+Tasks
+Create a working directory /home/user/workspace on the Ansible control node.
+
+Create an inventory.ini file manually that defines the managed node server1 with correct SSH and sudo credentials.
+
+Use the Ansible command module to list files in the /tmp directory on server1.
+
+Attempt to use the command module with a pipe (|) to filter output and observe the failure.
+
+Use the Ansible shell module to successfully execute the same piped command.
+
+Use the shell module to redirect command output to a file /tmp/tmp_files.txt on the managed node.
+
+Verify the created file using an Ansible command.
+
+Outcome
+After completing this lab, you will be able to:
+
+Explain the functional difference between command and shell
+
+Identify scenarios where command is preferred
+
+Recognize when shell is required
+
+Safely use shell features like pipes and redirection
+
+_________________________________________________________
+
+# created inventory.ini file - /home/user/workspace/inventory.ini
+
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+
+# verify by ping 
+
+>>ansible web -i inventory.ini -m ping
+
+server1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+# Use the Ansible command module to list files in the /tmp directory on server1.
+
+>>ansible web -i inventory.ini -m command -a "ls -l /tmp"
+
+server1 | CHANGED | rc=0 >>
+total 12
+drwx------ 2 server1_admin server1_admin 4096 Jan 23 08:22 ansible_ansible.legacy.command_payload_tcx3uoqr
+drwx------ 3 root          root          4096 Jan 23 08:06 systemd-private-49662fe8c10e48e79dfee201b0182f89-systemd-logind.service-Ev7S96
+-rw-rw-r-- 1 server1_admin server1_admin  141 Jan 23 08:15 tmp_files.txt
+ 
+
+# Attempt to use the command module with a pipe (|) to filter output and observe the failure.
+
+>>ansible web -i inventory.ini -m command -a "ls -l /tmp | grep log"
+
+server1 | FAILED | rc=2 >>
+/tmp:
+total 12
+drwx------ 2 server1_admin server1_admin 4096 Jan 23 08:24 ansible_ansible.legacy.command_payload_n20anflq
+drwx------ 3 root          root          4096 Jan 23 08:06 systemd-private-49662fe8c10e48e79dfee201b0182f89-systemd-logind.service-Ev7S96
+-rw-rw-r-- 1 server1_admin server1_admin  141 Jan 23 08:15 tmp_files.txtls: cannot access '|': No such file or directory
+ls: cannot access 'grep': No such file or directory
+ls: cannot access 'log': No such file or directorynon-zero return code
+
+# Use the Ansible shell module to successfully execute the same piped command.
+
+ansible web -i inventory.ini -m shell -a "ls -l /tmp | grep log"
+
+server1 | CHANGED | rc=0 >>
+drwx------ 3 root          root          4096 Jan 23 08:06 systemd-private-49662fe8c10e48e79dfee201b0182f89-systemd-logind.service-Ev7S96
+
+# Use the shell module to redirect command output to a file /tmp/tmp_files.txt on the managed node.
+
+ansible web -i inventory.ini -m shell -a "ls -l /tmp > tmp/tmp_files.txt"
+
+server1 | CHANGED | rc=0 >>
+
+
+# Verify the created file using an Ansible command.
+
+ansible web -i inventory.ini -m shell -a "ls /tmp/tmp_files.txt"
+
+server1 | CHANGED | rc=0 >>
+/tmp/tmp_files.txt
+
