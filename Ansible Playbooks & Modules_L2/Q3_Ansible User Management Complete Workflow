@@ -1,0 +1,126 @@
+Q3. Ansible User Management Complete Workflow
+Solved
+Guide for using Scaler IDE to solve DevOps problems.
+feature icon
+Using hints except Complete Solution is Penalty free now
+Use Hint
+Description
+In this lab, you will implement a complete user provisioning and deprovisioning workflow using Ansible. Managing user accounts is a core DevOps responsibility, including onboarding new team members and safely removing obsolete accounts.
+
+You are provided with an Ansible control node and a managed node (server1). Your task is to create an Ansible playbook that provisions multiple users with consistent configurations and removes an existing legacy user. The lab emphasizes idempotent, auditable, and production-safe user management using the Ansible user module.
+
+Required Credentials for the Lab:
+
+SSH Credentials: (for remote connection to server1)
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Credentials (for privilege escalation)
+Sudo Password: server1_admin@123!
+Tasks
+Create a working directory named workspace under "/home/user"
+
+Inside workspace, create an inventory.ini file that:
+
+Defines a host group named web
+
+Includes server1 with valid SSH and sudo credentials
+
+Verify that a legacy user named olduser already exists on server1.
+
+Create an Ansible playbook named user-management.yml that:
+
+Targets the web host group
+
+Enables privilege escalation using become
+
+Disables fact gathering
+
+Creates users dev1, dev2, and admin
+
+Each with /bin/bash shell
+
+Each with an automatically created home directory
+
+Removes the user olduser completely, including its home directory
+
+5. Run a syntax check on the playbook.
+
+6. Execute the playbook and verify the final system state.
+
+Outcomes
+After completing this lab, you will be able to:
+
+Use the Ansible user module for account management
+Create users with defined shells and home directories
+Remove users safely and completely
+Understand state: present vs state: absent
+Apply idempotent, repeatable user management workflows
+Perform real-world user provisioning and deprovisioning using Ansible
+
+-------------------------------------------------------------------------
+
+# Need to create requed file and inventry file
+
+mkdir -p /home/user/workspace && cd /home/user/workspace
+
+cat > inventory.ini << 'EOF'
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_password=server1_admin@123! ansible_become_password=server1_admin@123!
+EOF
+
+# Need to understand tasks 
+Tasks
+
+Create a working directory named workspace under "/home/user"
+
+Inside workspace, create an inventory.ini file that:
+
+Defines a host group named web
+
+Includes server1 with valid SSH and sudo credentials
+
+Verify that a legacy user named olduser already exists on server1.
+
+Create an Ansible playbook named user-management.yml that:
+
+Targets the web host group
+
+Enables privilege escalation using become
+
+Disables fact gathering
+
+Creates users dev1, dev2, and admin
+
+Each with /bin/bash shell
+
+Each with an automatically created home directory
+
+Removes the user olduser completely, including its home directory
+
+# Need to create few user with bin/bash shell and home directory and need to remove one user
+# as per this create yml file
+
+- name: User-Management
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Create users dev1, dev2, and admin
+      user:
+        name: "{{ item }}"
+        shell: /bin/bash
+        create_home: true
+        state: present
+      loop:
+        - dev1
+        - dev2
+        - admin
+
+    - name: Remove user olduser completely
+      user:
+        name: olduser
+        state: absent
+        remove: true
+
+
+Done 
