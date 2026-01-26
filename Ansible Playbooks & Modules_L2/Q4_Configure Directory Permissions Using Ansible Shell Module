@@ -1,0 +1,79 @@
+Description
+In this lab, you will learn how to manage directory creation, ownership, and permissions on a remote server using Ansible. Correct directory permissions are critical for web servers to function securely and reliably.
+
+You are provided with an Ansible control node and a managed node (server1). Your task is to configure the web root directory /var/www/html on server1, ensuring it exists, is owned by the correct system user, and has appropriate permissions.
+
+This lab focuses on:
+
+Remote command execution using Ansible
+Ownership and permission verification
+Understanding Linux permission bits in real-world scenarios
+Required Credentials for the Lab:
+
+SSH Credentials: (for remote connection to server1)
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Credentials (for privilege escalation)
+Sudo Password: server1_admin@123!
+Tasks
+Create a working directory named workspace under /home/user on the Ansible control node.
+
+Inside the workspace directory, create an inventory.ini file that:
+
+Defines a host named server1
+
+Uses the correct SSH credentials
+
+Allows Ansible to connect to the managed node
+
+Use an Ansible ad-hoc command with the shell module to:
+
+Create the directory /var/www/html on server1
+
+Set ownership to www-data:www-data
+
+Ensure permissions are set to 755
+
+Verify the directory configuration by checking:
+
+Directory existence
+
+Ownership (www-data)
+
+Permissions (drwxr-xr-x)
+
+Outcomes
+After completing this lab, you will be able to:
+
+Use Ansible ad-hoc commands for remote directory management
+Apply ownership and permissions correctly
+Understand how Linux permissions affect web servers
+Validate system state using command output
+Confidently automate basic system configuration tasks
+
+______________________________________________________________
+
+
+1) Use an Ansible ad-hoc command with the shell module to:
+
+Create the directory /var/www/html on server1
+
+Set ownership to www-data:www-data
+
+Ensure permissions are set to 755
+
+2) Verify the directory configuration by checking:
+
+Directory existence
+
+Ownership (www-data)
+
+Permissions (drwxr-xr-x)
+
+
+# To do this all we will user one Ad-hoc command
+
+ansible web -i inventory.ini -m shell -a "mkdir -p /var/www/htm && chwon www-data:www-data /var/www/htm && chmod 755 /var/www/htm
+
+
+Done
