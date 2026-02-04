@@ -1,0 +1,123 @@
+Description
+Learn how to use Jinja2 conditional statements to dynamically modify configuration files based on variables, without changing the template itself. In real-world systems, not all configurations apply everywhere. In this lab Gzip compression should only be enabled in production environments and the same NGINX template must work for both dev and prod. You will achieve this by controlling behavior using variables, not separate templates.
+
+Required Credentials for the Lab:
+
+SSH Credentials: (for remote connection to server1)
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Credentials (for privilege escalation)
+Sudo Password: server1_admin@123!
+Tasks
+1. Create a workspace
+
+Set up /home/user/workspace as your Ansible working directory.
+2. Create inventory.ini
+
+Define a web host group containing server1.
+
+Include SSH and sudo credentials for Ansible connectivity.
+
+3. Create a Jinja2 template
+
+File name: /home/user/workspace/nginx.conf.j2
+
+The template must:
+
+Always define a basic NGINX server block
+
+Conditionally include gzip on; only if enable_gzip is true
+
+4. Create an Ansible playbook
+
+File name: conditional-gzip.yml
+
+The playbook must:
+
+Target the web group
+
+Use become: true
+
+Define a variable enable_gzip
+
+Deploy the template to /etc/nginx/nginx.conf
+
+5. Run the playbook twice
+
+First run: enable_gzip: false
+
+Second run: enable_gzip: true
+
+6. Verify behavior
+
+Confirm:
+
+gzip on; is absent when disabled
+
+gzip on; is present when enabled
+
+The template file itself must not change
+
+Expected Outcome
+Install Nginx if not already present
+
+One template works for all environments
+
+Gzip is enabled only when required
+
+Configuration is controlled entirely by variables
+
+
+____________________________________________________________________
+
+
+tep 1: Create Workspace
+mkdir -p /home/user/workspace
+cd /home/user/workspace
+Step 2: Create inventory.ini
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_password=server1_admin@123! ansible_become_password=server1_admin@123!
+Step 3: Create Jinja2 Template (nginx.conf.j2)
+server {
+    listen 80;
+    server_name localhost;
+
+    {% if enable_gzip %}
+    gzip on;
+    gzip_types text/plain text/css application/json;
+    {% endif %}
+
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
+}
+Step 4: Create Playbook (conditional-gzip.yml)
+- hosts: web
+  become: true
+  gather_facts: false
+
+  vars:
+    enable_gzip: false   # change to true for production
+
+  tasks:
+    - name: Install nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Deploy nginx configuration with conditional gzip
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+Step 5: Execute Playbook
+ansible-playbook -i inventory.ini conditional-gzip.yml
+
+Step 6: Test Production Mode
+Edit the playbook:
+
+enable_gzip: true
+
+Re-run:
+
+ansible-playbook -i inventory.ini conditional-gzip.yml
