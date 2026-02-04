@@ -1,0 +1,200 @@
+Description
+In this lab, you will learn how Ansible templates (Jinja2) help eliminate hard-coded configuration values by dynamically injecting variables into configuration files.
+
+Instead of manually editing configuration files for every server, you will define variables once and let Ansible generate the final configuration automatically. This is a foundational skill for scalable and maintainable automation.
+
+You are provided with an Ansible control node and a managed node (server1).
+
+Your task is to:
+
+Create an NGINX configuration using a Jinja2 template
+
+Define variables inside the playbook
+
+Deploy the rendered configuration to the remote server
+
+Lab Objective
+How Jinja2 templates work in Ansible
+
+How variables replace hard-coded values
+
+How Ansible generates final configuration files dynamically
+
+Required Credentials for the Lab:
+
+SSH Credentials: (for remote connection to server1)
+SSH Username: server1_admin
+SSH Password: server1_admin@123!
+Sudo Credentials (for privilege escalation)
+Sudo Password: server1_admin@123!
+Tasks
+1. Set up the Ansible workspace on the control node
+
+Create a dedicated working directory named "workspace" under /home/user.
+
+All lab files must be created and managed from this directory.
+
+2. Define the managed node in inventory.ini
+
+Inside the workspace directory, create an inventory.ini file that defines a host group named web.
+
+The inventory must include:
+
+The managed node server1
+
+Correct SSH authentication details
+
+Privilege escalation credentials so Ansible can perform administrative tasks
+
+This step ensures Ansible can:
+
+Connect to server1 over SSH
+
+Run tasks with elevated privileges (become)
+
+Target the correct host group during playbook execution
+
+3. Create a Jinja2 template for NGINX configuration
+
+Create a Jinja2 template file named nginx.conf.j2 in the workspace.
+
+The template should:
+
+Represent an NGINX server block configuration
+
+Use Jinja2 variable placeholders instead of hardcoded values
+
+Reference variables for:
+
+The listening port
+
+The server name
+
+The web root directory
+
+This task introduces template-based configuration management, where the same template can be reused across environments by changing variables instead of rewriting files.
+
+4. Define variables inside the playbook
+
+In your Ansible playbook, define variables that will be injected into the Jinja2 template at runtime.
+
+These variables should represent:
+
+The port on which NGINX listens (use the default port commonly used by NGINX for HTTP traffic)
+
+The server name (configure it for local access during development and testing)
+
+The document root for the website (use the standard web root directory used by NGINX on most Linux systems: /var/www/html)
+
+Defining variables in the playbook demonstrates how Ansible separates configuration logic (templates) from environment-specific values (variables).
+
+5. Create the Ansible playbook to deploy the template
+
+Create a playbook named "nginx-template.yml" inside the workspace directory.
+
+The playbook must:
+
+Target the web host group
+
+Use privilege escalation (become)
+
+Disable fact gathering for faster execution
+
+Ensure the NGINX package is installed on the managed node
+
+Deploy the rendered Jinja2 template to /etc/nginx/nginx.conf
+
+This step ensures:
+
+Required infrastructure (NGINX) exists before configuration is applied
+
+The template is rendered safely and idempotently
+
+Configuration deployment follows production best practices
+
+6. Execute the playbook on the managed node
+
+Run the playbook against server1 using the inventory file.
+
+During execution, Ansible should:
+
+Install NGINX if it is not already present
+
+Render the Jinja2 template with the defined variables
+
+Copy the final configuration file to /etc/nginx/nginx.conf
+
+7. Verify the rendered configuration on server1
+
+After execution, verify that:
+
+The file /etc/nginx/nginx.conf exists on server1
+
+Variable placeholders have been replaced with actual values
+
+The final configuration matches the expected output
+
+This confirms successful template rendering and variable substitution, which is the core learning objective of this lab.
+
+Outcomes
+After completing this lab, you will be able to:
+
+Understand how Ansible variables work
+
+Use Jinja2 templates (.j2) with Ansible
+
+Safely deploy configuration files using the template module
+
+Handle dependencies correctly in playbooks
+
+Validate and verify configuration changes on remote servers
+
+
+___________________________________________________________________________
+
+
+Create the workspace directory:
+mkdir -p /home/user/workspace
+cd /home/user/workspace
+Create the inventory file:
+[web]
+server1 ansible_host=server1 ansible_user=server1_admin ansible_password=server1_admin@123! ansible_become_password=server1_admin@123!
+Create the Jinja2 template nginx.conf.j2:
+server {
+    listen {{ nginx_port }};
+    server_name {{ server_name }};
+
+    location / {
+        root {{ web_root }};
+        index index.html;
+    }
+}
+Create the playbook nginx-template.yml:
+- hosts: web
+  become: true
+  gather_facts: false
+
+  vars:
+    nginx_port: 80
+    server_name: localhost
+    web_root: /var/www/html
+
+  tasks:
+    - name: Install nginx package
+      package:
+        name: nginx
+        state: present
+
+    - name: Deploy nginx configuration using template
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+
+Run a syntax check:
+ansible-playbook -i inventory.ini nginx-template.yml --syntax-check
+
+Execute the playbook:
+ansible-playbook -i inventory.ini nginx-template.yml
+
+Verify the rendered file on server1:
+ansible -i inventory.ini web -m shell -a "cat /etc/nginx/nginx.conf"

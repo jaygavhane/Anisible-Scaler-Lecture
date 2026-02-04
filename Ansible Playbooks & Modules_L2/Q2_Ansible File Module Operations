@@ -70,8 +70,8 @@ Understand idempotent file system automation with Ansible
 
 file-operations.yaml  inventory.ini
 user@8143b7821c93:~/workplace$ cat inventory.ini        
-[web]
-server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
+  [web]
+  server1 ansible_host=server1 ansible_user=server1_admin ansible_ssh_pass=server1_admin@123! ansible_become_pass=server1_admin@123!
 user@8143b7821c93:~/workplace$ 
 
 # Need to under stand the requerements 
